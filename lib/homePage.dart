@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'addPost.dart';
 
 import 'widgets/posts.dart';
 
@@ -28,9 +29,14 @@ class _HomePageState extends State<HomePage> {
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
-            child: const Icon(
-              Icons.add_a_photo,
+            child: IconButton(
+              icon: const Icon(Icons.add_a_photo),
               color: Colors.black,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => AddPost()),
+                );
+              },
             ),
           ),
         ],
