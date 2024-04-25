@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'login.dart'; // Ensure you have this page in your project or adjust the navigation accordingly
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -11,10 +11,9 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String? userRole;
+  final TextEditingController _bioController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
@@ -22,9 +21,9 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text('Create an Account')),
-      body: Padding(
+      body: SingleChildScrollView(
+        // Added SingleChildScrollView to handle overflow when keyboard appears
         padding: const EdgeInsets.all(12.0),
         child: Form(
           key: _formKey,
@@ -32,26 +31,13 @@ class _SignUpPageState extends State<SignUpPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               TextFormField(
-                controller: _firstNameController,
+                controller: _usernameController,
                 decoration: InputDecoration(
-                  labelText: 'First Name',
+                  labelText: 'Username',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a first name';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 14),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: InputDecoration(
-                  labelText: 'Last Name',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a last name';
+                    return 'Please enter a username';
                   }
                   return null;
                 },
@@ -62,48 +48,20 @@ class _SignUpPageState extends State<SignUpPage> {
                 decoration: InputDecoration(
                   labelText: 'Email Address',
                 ),
-                // The validator receives the text that the user has entered.
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter email';
+                    return 'Please enter your email';
                   }
                   if (!value.contains('@') || !value.contains('.')) {
-                    return 'Enter email in correct format';
+                    return 'Enter a valid email address';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 14),
-              Text('User Role'),
-              DropdownButton(
-                hint: userRole == null
-                    ? Text('User Role')
-                    : Text(
-                        userRole!,
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                isExpanded: true,
-                iconSize: 30.0,
-                style: TextStyle(color: Colors.blue),
-                items: ['user', 'admin', 'advanced user'].map(
-                  (val) {
-                    return DropdownMenuItem<String>(
-                      value: val,
-                      child: Text(val),
-                    );
-                  },
-                ).toList(),
-                onChanged: (val) {
-                  setState(
-                    () {
-                      userRole = val;
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: 14),
               TextFormField(
                 controller: _passwordController,
+                obscureText: true, // Ensures password is entered hidden
                 decoration: InputDecoration(
                   labelText: 'Password',
                   hintText: 'At least 6 characters',
@@ -114,6 +72,20 @@ class _SignUpPageState extends State<SignUpPage> {
                   }
                   if (value.length < 6) {
                     return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 14),
+              TextFormField(
+                controller: _bioController,
+                decoration: InputDecoration(
+                  labelText: 'Bio',
+                  hintText: 'Tell us something about yourself',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a bio';
                   }
                   return null;
                 },
@@ -131,35 +103,30 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _register() async {
-    String now = new DateTime.now().toString();
-    // String id = _auth.currentUser!.uid;
     if (_formKey.currentState!.validate()) {
       try {
         await _auth.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
-        await _users.add({
+        await _users.doc(_auth.currentUser!.uid).set({
           'id': _auth.currentUser!.uid,
-          'firstName': _firstNameController.text,
-          'lastName': _lastNameController.text,
+          'username': _usernameController.text,
           'email': _emailController.text,
-          'userRole': userRole,
-          'registrationTime': now
+          'bio': _bioController.text,
+          'registrationTime': DateTime.now().toString(),
         });
-        _emailController.clear();
-        _passwordController.clear();
-        FocusManager.instance.primaryFocus?.unfocus();
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(
+              builder: (context) =>
+                  LoginPage()), // Make sure LoginPage is defined or replace with your login page
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Failed to register'),
+          content: Text('Failed to register. Error: ${e.toString()}'),
         ));
       }
     }
-    //add email and password to firebase
   }
 }

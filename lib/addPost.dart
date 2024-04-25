@@ -21,7 +21,14 @@ class _AddPostState extends State<AddPost> {
   @override
   _fetchNewMedia() async {
     lastPage = currentPage;
-    final PermissionState ps = await PhotoManager.requestPermissionExtend();
+    final PermissionState ps = await PhotoManager.requestPermissionExtend(
+      requestOption: const PermissionRequestOption(
+        androidPermission: AndroidPermission(
+          type: RequestType.common,
+          mediaLocation: true,
+        ),
+      ),
+    );
     if (ps.isAuth) {
       List<AssetPathEntity> album =
           await PhotoManager.getAssetPathList(type: RequestType.image);
@@ -67,7 +74,7 @@ class _AddPostState extends State<AddPost> {
         currentPage++;
       });
     } else {
-      print(ps.isAuth);
+      print(ps);
     }
   }
 
@@ -96,9 +103,9 @@ class _AddPostState extends State<AddPost> {
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: GestureDetector(
                 onTap: () {
-                  // Navigator.of(context).push(MaterialPageRoute(
-                  //   builder: (context) => AddPostCaption(_file!),
-                  // ));
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => AddPostCaption(_file!),
+                  ));
                 },
                 child: Text(
                   'Next',

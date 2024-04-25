@@ -11,11 +11,13 @@ dependencies:
   firebase_auth: ^4.19.2
   firebase_core: ^2.30.0
   firebase_messaging: ^14.8.2
+  firebase_storage: ^11.7.4
   flutter:
     sdk: flutter
   flutter_screenutil: ^5.9.0
   image_picker: ^1.1.0
   photo_manager: ^3.0.0
+  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_test:
