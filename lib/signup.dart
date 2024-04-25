@@ -11,10 +11,8 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String? userRole;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
@@ -32,26 +30,13 @@ class _SignUpPageState extends State<SignUpPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               TextFormField(
-                controller: _firstNameController,
+                controller: _usernameController,
                 decoration: InputDecoration(
-                  labelText: 'First Name',
+                  labelText: 'Username',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a first name';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 14),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: InputDecoration(
-                  labelText: 'Last Name',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a last name';
+                    return 'Please enter a username';
                   }
                   return null;
                 },
@@ -62,7 +47,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 decoration: InputDecoration(
                   labelText: 'Email Address',
                 ),
-                // The validator receives the text that the user has entered.
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter email';
@@ -71,34 +55,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     return 'Enter email in correct format';
                   }
                   return null;
-                },
-              ),
-              SizedBox(height: 14),
-              Text('User Role'),
-              DropdownButton(
-                hint: userRole == null
-                    ? Text('User Role')
-                    : Text(
-                        userRole!,
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                isExpanded: true,
-                iconSize: 30.0,
-                style: TextStyle(color: Colors.blue),
-                items: ['user', 'admin', 'advanced user'].map(
-                  (val) {
-                    return DropdownMenuItem<String>(
-                      value: val,
-                      child: Text(val),
-                    );
-                  },
-                ).toList(),
-                onChanged: (val) {
-                  setState(
-                    () {
-                      userRole = val;
-                    },
-                  );
                 },
               ),
               SizedBox(height: 14),
@@ -132,7 +88,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _register() async {
     String now = new DateTime.now().toString();
-    // String id = _auth.currentUser!.uid;
     if (_formKey.currentState!.validate()) {
       try {
         await _auth.createUserWithEmailAndPassword(
@@ -141,14 +96,13 @@ class _SignUpPageState extends State<SignUpPage> {
         );
         await _users.add({
           'id': _auth.currentUser!.uid,
-          'firstName': _firstNameController.text,
-          'lastName': _lastNameController.text,
+          'username': _usernameController.text,
           'email': _emailController.text,
-          'userRole': userRole,
           'registrationTime': now
         });
         _emailController.clear();
         _passwordController.clear();
+        _usernameController.clear();
         FocusManager.instance.primaryFocus?.unfocus();
         Navigator.push(
           context,
@@ -160,6 +114,5 @@ class _SignUpPageState extends State<SignUpPage> {
         ));
       }
     }
-    //add email and password to firebase
   }
 }
