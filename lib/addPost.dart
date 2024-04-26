@@ -90,7 +90,7 @@ class _AddPostState extends State<AddPost> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey.shade100,
         elevation: 0,
         title: const Text(
           'New Post',

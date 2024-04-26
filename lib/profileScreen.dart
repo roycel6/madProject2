@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:proj2_real/editProfile.dart';
 import 'postScreen.dart';
 import 'widgets/posts.dart';
 import 'firebase/firestore.dart';
@@ -23,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.grey.shade100,
         automaticallyImplyLeading: false,
         title: Text("Profile"),
         actions: [
@@ -146,16 +148,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SizedBox(height: 10),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 15),
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 30,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: Colors.grey.shade400),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditProfilePage(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                height: 30,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(5),
+                                  border:
+                                      Border.all(color: Colors.grey.shade400),
+                                ),
+                                child: Text('Edit Bio'),
                               ),
-                              child: Text('Edit Bio'),
                             ),
                           ),
                         ],

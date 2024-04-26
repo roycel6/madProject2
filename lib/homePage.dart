@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.grey.shade100,
         automaticallyImplyLeading: false,
         elevation: 0,
         centerTitle: true,
@@ -40,7 +41,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-        backgroundColor: Color(0xffFAFAFA),
       ),
       body: CustomScrollView(
         slivers: [

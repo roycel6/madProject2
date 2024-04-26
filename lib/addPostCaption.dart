@@ -21,7 +21,7 @@ class _AddPostCaptionState extends State<AddPostCaption> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey.shade100,
         elevation: 0,
         title: Text(
           'Add a Caption',

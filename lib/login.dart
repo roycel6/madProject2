@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       key: _formkey,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Login', style: TextStyle(color: Colors.white)),
+          title: Text('Login', style: TextStyle(color: Colors.black)),
           automaticallyImplyLeading: false,
         ),
         body: Padding(
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                     _login();
                   }
                 },
-                child: Text('Login', style: TextStyle(color: Colors.white)),
+                child: Text('Login', style: TextStyle()),
               ),
               SizedBox(height: 14),
               TextButton(
