@@ -42,4 +42,41 @@ class FirestoreData {
     });
     return true;
   }
+
+  Future<bool> Comment({required String comment, required String uidd}) async {
+    var uid = Uuid().v4();
+    UserModel user = await getUser();
+    await _firestore
+        .collection('posts')
+        .doc(uidd)
+        .collection('comments')
+        .doc(uid)
+        .set({
+      'comment': comment,
+      'username': user.username,
+      'CommentUid': uid,
+    });
+    return true;
+  }
+
+  Future<String> like(
+      {required List like, required String uid, required String postID}) async {
+    String res = 'error';
+
+    try {
+      if (like.contains(uid)) {
+        _firestore.collection('posts').doc(postID).update({
+          'like': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        _firestore.collection('posts').doc(postID).update({
+          'like': FieldValue.arrayUnion([uid])
+        });
+      }
+      res = 'success';
+    } on Exception catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
 }

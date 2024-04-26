@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'widgets/navigationBar.dart';
 import 'login.dart'; // Ensure you have this page in your project or adjust the navigation accordingly
 
 class SignUpPage extends StatefulWidget {
@@ -120,7 +121,7 @@ class _SignUpPageState extends State<SignUpPage> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  LoginPage()), // Make sure LoginPage is defined or replace with your login page
+                  Navigation_Bar()), // Make sure LoginPage is defined or replace with your login page
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

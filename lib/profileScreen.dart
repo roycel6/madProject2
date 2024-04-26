@@ -1,4 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'postScreen.dart';
+import 'widgets/posts.dart';
+import 'firebase/firestore.dart';
+import 'model/userModel.dart';
+import 'util/imageCached.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -8,81 +15,155 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  int postLength = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text("Profile"),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.logout),
             onPressed: () {
+              Navigator.pop(context);
+              _logout();
               // Navigate to settings page or perform other actions
             },
           ),
         ],
       ),
-      body: ListView(
-        children: <Widget>[
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: FutureBuilder(
+                future: FirestoreData().getUser(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return Head(snapshot.data!);
+                },
+              ),
+            ),
+            StreamBuilder(
+              stream: _firestore
+                  .collection('posts')
+                  .where(
+                    'uid',
+                    isEqualTo: _auth.currentUser!.uid,
+                  )
+                  .snapshots(),
+              builder: ((context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SliverToBoxAdapter(
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                postLength = snapshot.data!.docs.length;
+                return SliverGrid(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    var post = snapshot.data!.docs[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => PostScreen(post.data()),
+                          ),
+                        );
+                      },
+                      child: CachedImage(
+                        post['postImage'],
+                      ),
+                    );
+                  }, childCount: postLength),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3, // number of columns
+                    crossAxisSpacing: 2, // horizontal space between items
+                    mainAxisSpacing: 2, // vertical space between items
+                  ),
+                );
+              }),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget Head(UserModel user) {
+    return Container(
+      child: Column(
+        children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Example profile image
+                    ClipOval(
+                      child: SizedBox(
+                        width: 90,
+                        height: 90,
+                        child: Icon(Icons.person_2_outlined, size: 90),
+                      ),
                     ),
+                    // CircleAvatar(
+                    //   radius: 40,
+                    //   backgroundImage: NetworkImage(
+                    //       'https://via.placeholder.com/150'), // Example profile image
+                    // ),
                     Expanded(
                       child: Column(
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
-                              _buildStatColumn("Posts", 40),
-                              _buildStatColumn("Followers", 1200),
-                              _buildStatColumn("Following", 150),
+                              _buildStatColumn("Posts", postLength),
                             ],
                           ),
                           SizedBox(height: 10),
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
-                              "User's Name",
+                              user.username,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            child: Text("Bio goes here. User description or any other details."),
-                          )
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            child: Text(
+                              user.bio,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 15),
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: 30,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(5),
+                                border: Border.all(color: Colors.grey.shade400),
+                              ),
+                              child: Text('Edit Bio'),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                Divider(),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, // number of columns
-                    crossAxisSpacing: 2, // horizontal space between items
-                    mainAxisSpacing: 2, // vertical space between items
-                  ),
-                  itemCount: 20, // number of items in your grid
-                  itemBuilder: (context, index) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage('https://via.placeholder.com/100'), // Example image
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                // Divider(),
               ],
             ),
           ),
@@ -113,5 +194,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
+  }
+
+  void _logout() async {
+    //logout
+    await _auth.signOut();
   }
 }

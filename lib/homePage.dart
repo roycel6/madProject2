@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'addPost.dart';
@@ -12,17 +14,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
-    // ScreenUtil.init(
-    //   designSize: const Size(360, 690),
-    //   minTextAdapt: true,
-    //   splitScreenMode: true,
-    // );
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         elevation: 0,
         centerTitle: true,
         title: Text('ArtDisplay'),
@@ -44,13 +44,26 @@ class _HomePageState extends State<HomePage> {
       ),
       body: CustomScrollView(
         slivers: [
-          SliverList(
-              delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return Posts();
+          StreamBuilder(
+            stream: _firestore
+                .collection('posts')
+                .orderBy('time', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    return Posts(snapshot.data!.docs[index].data());
+                  },
+                  childCount:
+                      snapshot.data == null ? 0 : snapshot.data!.docs.length,
+                ),
+              );
             },
-            childCount: 5,
-          ))
+          )
         ],
       ),
     );
