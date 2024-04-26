@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:proj2_real/firebase/firestore.dart';
 import 'package:proj2_real/util/imageCached.dart';
+import '../othersProfileScreen.dart';
 import '../widgets/likeAnimation.dart';
 import '../widgets/comments.dart';
 
@@ -21,10 +24,10 @@ class _PostsState extends State<Posts> {
   bool isAnimating = false;
   String user = '';
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     user = _auth.currentUser!.uid;
   }
@@ -32,23 +35,42 @@ class _PostsState extends State<Posts> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 375,
-          height: 54,
-          color: Colors.white,
-          child: Center(
-            child: ListTile(
-              leading: ClipOval(
-                child: SizedBox(
-                  width: 35,
-                  height: 35,
-                  child: Icon(Icons.person_2_outlined),
-                ),
-              ),
-              title: Text(
-                widget.snapshot['username'],
-                style: TextStyle(fontSize: 13),
-              ),
+        InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => OtherProfileScreen(
+                  uidd: widget.snapshot['uid'],
+                  username: widget.snapshot['username'],
+                  profilePic: widget.snapshot['profilePic'],
+                  bio: widget.snapshot['bio']),
+            ),
+          ),
+          child: Container(
+            width: 375,
+            height: 54,
+            color: Colors.white,
+            child: Center(
+              child: ListTile(
+                  leading: ClipOval(
+                    child: SizedBox(
+                      width: 35,
+                      height: 35,
+                      child: CachedImage(widget.snapshot['profilePic']),
+                    ),
+                  ),
+                  title: Text(
+                    widget.snapshot['username'],
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  trailing: _auth.currentUser!.uid == widget.snapshot['uid']
+                      ? IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _deleteItem(
+                            widget.snapshot['postID'],
+                            widget.snapshot['postImage'],
+                          ),
+                        )
+                      : null),
             ),
           ),
         ),
@@ -161,11 +183,22 @@ class _PostsState extends State<Posts> {
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Row(
                   children: [
-                    Text(
-                      widget.snapshot['username'] + '  ',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                    InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => OtherProfileScreen(
+                              uidd: widget.snapshot['uid'],
+                              username: widget.snapshot['username'],
+                              profilePic: widget.snapshot['profilePic'],
+                              bio: widget.snapshot['bio']),
+                        ),
+                      ),
+                      child: Text(
+                        widget.snapshot['username'] + '  ',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Text(
@@ -192,5 +225,10 @@ class _PostsState extends State<Posts> {
         )
       ],
     );
+  }
+
+  void _deleteItem(String id, String URL) async {
+    FirebaseStorage.instance.refFromURL(URL).delete();
+    await _firestore.collection('posts').doc(id).delete();
   }
 }

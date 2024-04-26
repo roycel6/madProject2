@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:proj2_real/util/imageCached.dart';
 
 import 'chatPage.dart';
 
@@ -54,10 +55,12 @@ class _MessageBoardsState extends State<MessageBoards> {
     if (_auth.currentUser!.email != data['email']) {
       return ListTile(
           title: Text(data['username']),
-          leading: //checkbox
-              Icon(
-            Icons.chat_bubble,
-            color: Colors.teal,
+          leading: ClipOval(
+            child: SizedBox(
+              width: 35,
+              height: 35,
+              child: CachedImage(data['profilePic']),
+            ),
           ),
           onTap: () {
             Navigator.push(
@@ -66,6 +69,7 @@ class _MessageBoardsState extends State<MessageBoards> {
                   builder: (context) => ChatPage(
                     receiverUsername: data['username'],
                     receiverUserID: data['id'],
+                    receiverProfilePic: data['profilePic'],
                   ),
                 ));
           });

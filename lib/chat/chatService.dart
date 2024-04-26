@@ -17,11 +17,13 @@ class ChatService extends ChangeNotifier {
     List docsList = snapshotData.docs;
     var firstDoc = docsList[0];
     final String currentUsername = firstDoc.get('username');
+    final String currentProfilePic = firstDoc.get('profilePic');
     final Timestamp timestamp = Timestamp.now();
     Msg newMsg = Msg(
       senderID: currentUserID,
       senderEmail: currentUserEmail,
       senderUsername: currentUsername,
+      profilePic: currentProfilePic,
       receiverID: receiverID,
       timestamp: timestamp,
       msg: msg,

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../util/imageCached.dart';
+
 class ChatBubble extends StatelessWidget {
   final String msg;
-  const ChatBubble({super.key, required this.msg});
+  final String profilePic;
+  const ChatBubble({super.key, required this.msg, required this.profilePic});
 
   @override
   Widget build(BuildContext context) {

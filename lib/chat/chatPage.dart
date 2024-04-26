@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../util/imageCached.dart';
 import 'chatService.dart';
 import 'package:intl/intl.dart';
 
@@ -9,10 +10,12 @@ import 'chatBubble.dart';
 class ChatPage extends StatefulWidget {
   final String receiverUsername;
   final String receiverUserID;
+  final String receiverProfilePic;
   const ChatPage(
       {super.key,
       required this.receiverUsername,
-      required this.receiverUserID});
+      required this.receiverUserID,
+      required this.receiverProfilePic});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -27,14 +30,33 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leadingWidth: 80,
           backgroundColor: Colors.grey.shade100,
           title: Text(widget.receiverUsername,
               style: TextStyle(color: Colors.black)),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+          leading: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.black),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 25,
+              ),
+              ClipOval(
+                child: SizedBox(
+                  width: 35,
+                  height: 35,
+                  child: CachedImage(widget.receiverProfilePic),
+                ),
+              ),
+            ],
           ),
         ),
         body: Column(
@@ -76,7 +98,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildMsgItem(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    String fullName = data['senderUsername'];
+    String userName = data['senderUsername'];
     var alignment = (data['senderID'] == _auth.currentUser!.uid)
         ? Alignment.centerRight
         : Alignment.centerLeft;
@@ -93,8 +115,18 @@ class _ChatPageState extends State<ChatPage> {
                   ? MainAxisAlignment.end
                   : MainAxisAlignment.start,
               children: [
-                Text(fullName),
-                ChatBubble(msg: data['msg']),
+                ClipOval(
+                  child: SizedBox(
+                    width: 25,
+                    height: 25,
+                    child: CachedImage(data['profilePic']),
+                  ),
+                ),
+                Text(userName),
+                ChatBubble(
+                  msg: data['msg'],
+                  profilePic: data['profilePic'],
+                ),
                 Text(DateFormat()
                     .add_yMMMEd()
                     .add_jm()

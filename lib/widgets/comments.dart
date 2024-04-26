@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:proj2_real/firebase/firestore.dart';
+import 'package:proj2_real/util/imageCached.dart';
+
+import '../othersProfileScreen.dart';
 
 class Comments extends StatefulWidget {
   String uid;
@@ -15,6 +19,7 @@ class Comments extends StatefulWidget {
 class _CommentsState extends State<Comments> {
   final comment = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -104,22 +109,50 @@ class _CommentsState extends State<Comments> {
 
   Widget commentItem(final snapshot) {
     return ListTile(
-      leading: ClipOval(
-        child: SizedBox(
-          width: 25,
-          height: 25,
-          child: Icon(Icons.person_2_outlined),
+        leading: InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => OtherProfileScreen(
+                  uidd: snapshot['uid'],
+                  username: snapshot['username'],
+                  profilePic: snapshot['profilePic'],
+                  bio: snapshot['bio']),
+            ),
+          ),
+          child: ClipOval(
+            child: SizedBox(
+              width: 35,
+              height: 35,
+              child: CachedImage(snapshot['profilePic']),
+            ),
+          ),
         ),
-      ),
-      title: Text(
-        snapshot['username'],
-        style: TextStyle(
-            fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-      ),
-      subtitle: Text(
-        snapshot['comment'],
-        style: TextStyle(fontSize: 13, color: Colors.black),
-      ),
-    );
+        title: Text(
+          snapshot['username'],
+          style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        subtitle: Text(
+          snapshot['comment'],
+          style: TextStyle(fontSize: 13, color: Colors.black),
+        ),
+        trailing: _auth.currentUser!.uid == snapshot['uid']
+            ? IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _deleteItem(
+                  snapshot['CommentUid'],
+                ),
+              )
+            : null);
+  }
+
+  void _deleteItem(String id) async {
+    //delete main item and all sub items
+    await _firestore
+        .collection('posts')
+        .doc(widget.uid)
+        .collection('comments')
+        .doc(id)
+        .delete();
   }
 }

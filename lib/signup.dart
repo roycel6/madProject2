@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'firebase/firestore.dart';
+import 'firebase/imgStorage.dart';
+import 'util/imagePicker.dart';
 import 'widgets/navigationBar.dart';
 import 'login.dart'; // Ensure you have this page in your project or adjust the navigation accordingly
 
@@ -18,7 +24,9 @@ class _SignUpPageState extends State<SignUpPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
-
+  String URL = '';
+  File? _profilePic;
+  File? _imageFile;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,6 +39,35 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Center(
+                child: InkWell(
+                  onTap: () async {
+                    _imageFile = await ImagePickerr().uploadImage('gallery');
+                    if (_imageFile != null) {
+                      setState(() {
+                        _profilePic = _imageFile;
+                      });
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius: 34,
+                    backgroundColor: Colors.grey,
+                    child: _profilePic == null
+                        ? CircleAvatar(
+                            radius: 32,
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage: AssetImage('images/person.png'),
+                          )
+                        : CircleAvatar(
+                            radius: 32,
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage:
+                                Image.file(_profilePic!, fit: BoxFit.cover)
+                                    .image,
+                          ),
+                  ),
+                ),
+              ),
               TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(
@@ -93,7 +130,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               SizedBox(height: 14),
               ElevatedButton(
-                onPressed: _register,
+                onPressed: () => _register(profilePic: _profilePic),
                 child: Text('Sign Up'),
               ),
             ],
@@ -103,20 +140,28 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  void _register() async {
+  Future<void> _register({required File? profilePic}) async {
     if (_formKey.currentState!.validate()) {
       try {
         await _auth.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
-        await _users.doc(_auth.currentUser!.uid).set({
-          'id': _auth.currentUser!.uid,
-          'username': _usernameController.text,
-          'email': _emailController.text,
-          'bio': _bioController.text,
-          'registrationTime': DateTime.now().toString(),
-        });
+
+        if (profilePic != null) {
+          URL = await StorageMethod()
+              .uploadImageToStorage('profilePic', profilePic);
+        } else {
+          URL =
+              'https://firebasestorage.googleapis.com/v0/b/mad-proj2.appspot.com/o/profilePic%2Fperson.png?alt=media&token=936530ff-ae79-42fd-a2c4-8c00dc11cfb3';
+        }
+
+        await FirestoreData().CreateUser(
+            email: _emailController.text,
+            username: _usernameController.text,
+            bio: _bioController.text,
+            profilePic: URL);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -127,6 +172,7 @@ class _SignUpPageState extends State<SignUpPage> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Failed to register. Error: ${e.toString()}'),
         ));
+        print(e.toString());
       }
     }
   }

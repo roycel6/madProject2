@@ -10,6 +10,23 @@ class FirestoreData {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  Future<bool> CreateUser({
+    required String email,
+    required String username,
+    required String bio,
+    required String profilePic,
+  }) async {
+    await _firestore.collection('users').doc(_auth.currentUser!.uid).set({
+      'id': _auth.currentUser!.uid,
+      'email': email,
+      'username': username,
+      'bio': bio,
+      'profilePic': profilePic,
+      'registrationTime': DateTime.now().toString(),
+    });
+    return true;
+  }
+
   Future<UserModel> getUser({String? uid}) async {
     try {
       final user = await _firestore
@@ -17,8 +34,8 @@ class FirestoreData {
           .doc(_auth.currentUser!.uid)
           .get();
       final currentUser = user.data()!;
-      return UserModel(
-          currentUser['bio'], currentUser['email'], currentUser['username']);
+      return UserModel(currentUser['bio'], currentUser['email'],
+          currentUser['username'], currentUser['profilePic']);
     } on FirebaseException catch (e) {
       throw exceptions(e.message.toString());
     }
@@ -34,17 +51,20 @@ class FirestoreData {
     await _firestore.collection('posts').doc(uid).set({
       'postImage': postImage,
       'username': user.username,
+      'profilePic': user.profilePic,
       'caption': caption,
       'uid': _auth.currentUser!.uid,
       'postID': uid,
       'like': [],
-      'time': data
+      'time': data,
+      'bio': user.bio,
     });
     return true;
   }
 
   Future<bool> Comment({required String comment, required String uidd}) async {
     var uid = Uuid().v4();
+    DateTime data = new DateTime.now();
     UserModel user = await getUser();
     await _firestore
         .collection('posts')
@@ -55,6 +75,10 @@ class FirestoreData {
       'comment': comment,
       'username': user.username,
       'CommentUid': uid,
+      'profilePic': user.profilePic,
+      'uid': _auth.currentUser!.uid,
+      'bio': user.bio,
+      'time': data,
     });
     return true;
   }

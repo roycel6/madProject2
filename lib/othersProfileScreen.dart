@@ -2,20 +2,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:proj2_real/editProfile.dart';
+import 'chat/chatPage.dart';
 import 'postScreen.dart';
 import 'widgets/posts.dart';
 import 'firebase/firestore.dart';
 import 'model/userModel.dart';
 import 'util/imageCached.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class OtherProfileScreen extends StatefulWidget {
+  String uidd;
+  String username;
+  String profilePic;
+  String bio;
+  OtherProfileScreen(
+      {Key? key,
+      required this.uidd,
+      required this.username,
+      required this.profilePic,
+      required this.bio})
+      : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<OtherProfileScreen> createState() => _OtherProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _OtherProfileScreenState extends State<OtherProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   int postLength = 0;
@@ -26,17 +37,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.grey.shade100,
         automaticallyImplyLeading: false,
-        title: Text("Profile"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              Navigator.pop(context);
-              _logout();
-              // Navigate to settings page or perform other actions
-            },
-          ),
-        ],
+        title: Text(widget.username),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: SafeArea(
         child: CustomScrollView(
@@ -57,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   .collection('posts')
                   .where(
                     'uid',
-                    isEqualTo: _auth.currentUser!.uid,
+                    isEqualTo: widget.uidd,
                   )
                   .snapshots(),
               builder: ((context, snapshot) {
@@ -113,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: SizedBox(
                         width: 80,
                         height: 80,
-                        child: CachedImage(user.profilePic),
+                        child: CachedImage(widget.profilePic),
                       ),
                     ),
                     Expanded(
@@ -129,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
-                              user.username,
+                              widget.username,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -137,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 4),
                             child: Text(
-                              user.bio,
+                              widget.bio,
                             ),
                           ),
                           SizedBox(height: 10),
@@ -147,22 +154,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => EditProfilePage(),
+                                    builder: (context) => ChatPage(
+                                      receiverUsername: widget.username,
+                                      receiverUserID: widget.uidd,
+                                      receiverProfilePic: widget.profilePic,
+                                    ),
                                   ),
                                 );
                               },
-                              child: Container(
-                                alignment: Alignment.center,
-                                height: 30,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(5),
-                                  border:
-                                      Border.all(color: Colors.grey.shade400),
-                                ),
-                                child: Text('Edit Bio'),
-                              ),
+                              child: widget.uidd == _auth.currentUser!.uid
+                                  ? Container(
+                                      alignment: Alignment.center,
+                                      height: 30,
+                                      width: double.infinity,
+                                    )
+                                  : Container(
+                                      alignment: Alignment.center,
+                                      height: 30,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade400,
+                                        borderRadius: BorderRadius.circular(5),
+                                        border: Border.all(
+                                            color: Colors.grey.shade400),
+                                      ),
+                                      child: Text(
+                                        'Message',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
@@ -201,10 +221,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
-  }
-
-  void _logout() async {
-    //logout
-    await _auth.signOut();
   }
 }

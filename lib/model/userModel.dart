@@ -5,6 +5,7 @@ class UserModel {
   String email;
   String username;
   String bio;
+  String profilePic;
 
-  UserModel(this.bio, this.email, this.username);
+  UserModel(this.bio, this.email, this.username, this.profilePic);
 }
