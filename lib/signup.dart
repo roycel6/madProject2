@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'firebase/firestore.dart';
 import 'firebase/imgStorage.dart';
 import 'util/imagePicker.dart';
 import 'widgets/navigationBar.dart';
 import 'login.dart'; // Ensure you have this page in your project or adjust the navigation accordingly
+
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -22,23 +24,28 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
   String URL = '';
   File? _profilePic;
   File? _imageFile;
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Create an Account')),
+
       body: SingleChildScrollView(
         // Added SingleChildScrollView to handle overflow when keyboard appears
+
         padding: const EdgeInsets.all(12.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+
               Center(
                 child: InkWell(
                   onTap: () async {
@@ -73,6 +80,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 decoration: InputDecoration(
                   labelText: 'Username',
                 ),
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a username';
@@ -99,7 +107,9 @@ class _SignUpPageState extends State<SignUpPage> {
               SizedBox(height: 14),
               TextFormField(
                 controller: _passwordController,
+
                 obscureText: true, // Ensures password is entered hidden
+
                 decoration: InputDecoration(
                   labelText: 'Password',
                   hintText: 'At least 6 characters',
@@ -121,6 +131,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   labelText: 'Bio',
                   hintText: 'Tell us something about yourself',
                 ),
+
               ),
               SizedBox(height: 14),
               ElevatedButton(
@@ -134,7 +145,9 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+
   Future<void> _register({required File? profilePic}) async {
+
     if (_formKey.currentState!.validate()) {
       try {
         await _auth.createUserWithEmailAndPassword(
@@ -161,6 +174,7 @@ class _SignUpPageState extends State<SignUpPage> {
           MaterialPageRoute(
               builder: (context) =>
                   Navigation_Bar()), // Make sure LoginPage is defined or replace with your login page
+
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
