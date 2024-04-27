@@ -121,12 +121,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   labelText: 'Bio',
                   hintText: 'Tell us something about yourself',
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a bio';
-                  }
-                  return null;
-                },
               ),
               SizedBox(height: 14),
               ElevatedButton(
