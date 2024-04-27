@@ -47,6 +47,7 @@ class _AddPostCaptionState extends State<AddPostCaption> {
                     isLoading = false;
                   });
                   Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 },
                 child: Text(
                   'Post',
