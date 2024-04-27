@@ -20,6 +20,7 @@ class _Navigation_BarState extends State<Navigation_Bar> {
   void initState() {
     super.initState();
     pageController = PageController();
+    _currentIndex = 0;
   }
 
   @override

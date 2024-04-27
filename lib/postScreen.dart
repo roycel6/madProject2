@@ -17,7 +17,7 @@ class PostScreen extends StatelessWidget {
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Posts(snapshot),
+        child: Center(child: Posts(snapshot)),
       ),
     );
   }
