@@ -2,6 +2,7 @@ import 'homePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'signup.dart';
+import 'widgets/navigationBar.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -28,7 +29,8 @@ class _LoginPageState extends State<LoginPage> {
       key: _formkey,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Login', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.grey.shade100,
+          title: Text('Login', style: TextStyle(color: Colors.black)),
           automaticallyImplyLeading: false,
         ),
         body: Padding(
@@ -65,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                     _login();
                   }
                 },
-                child: Text('Login', style: TextStyle(color: Colors.white)),
+                child: Text('Login', style: TextStyle()),
               ),
               SizedBox(height: 14),
               TextButton(
@@ -90,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
       FocusManager.instance.primaryFocus?.unfocus();
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => Navigation_Bar()),
       );
     } catch (e) {
       final snackBar = SnackBar(
