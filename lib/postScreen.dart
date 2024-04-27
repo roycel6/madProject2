@@ -15,7 +15,7 @@ class PostScreen extends StatelessWidget {
           child: Icon(Icons.arrow_back),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: SafeArea(
         child: Center(child: Posts(snapshot)),
       ),

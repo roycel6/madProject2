@@ -26,7 +26,10 @@ class _HomePageState extends State<HomePage> {
         automaticallyImplyLeading: false,
         elevation: 0,
         centerTitle: true,
-        title: Text('ArtDisplay'),
+        title: Text('ArtDisplay',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            )),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 16.0),

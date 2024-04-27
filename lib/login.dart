@@ -29,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       key: _formkey,
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.grey.shade100,
           title: Text('Login', style: TextStyle(color: Colors.black)),
           automaticallyImplyLeading: false,
         ),

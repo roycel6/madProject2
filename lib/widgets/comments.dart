@@ -147,7 +147,27 @@ class _CommentsState extends State<Comments> {
   }
 
   void _deleteItem(String id) async {
-    //delete main item and all sub items
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('This action will permanently delete this comment'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null || !result) {
+      return;
+    }
     await _firestore
         .collection('posts')
         .doc(widget.uid)
